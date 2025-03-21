@@ -1,6 +1,71 @@
-# Cartoonization using OpenCV
+# Cartoon_Rendering
 
 This project uses OpenCV to transform images into a cartoon-like style by applying edge detection and color simplification.
+
+## How it Works
+
+This project converts an image into a cartoon-style effect using OpenCV. The process consists of the following steps:
+
+1. **Load Image:** The input image is loaded and resized while maintaining its aspect ratio.
+2. **Convert to Grayscale:** The image is converted to grayscale to simplify edge detection.
+3. **Apply Median Blur:** A median blur is applied to reduce noise.
+4. **Detect Edges:** Adaptive thresholding is used to create a binary edge mask.
+5. **Simplify Colors:** A bilateral filter smooths the image while preserving edges.
+6. **Combine Edges and Colors:** The edges are overlaid on the simplified color image to create a cartoon effect.
+7. **Save & Display Output:** The processed image is saved and displayed.
+
+## Usage
+
+1. 필요한 라이브러리 설치:
+   ```bash
+   pip install opencv-python
+   ```
+2. `cartoon_rendering.py` 실행:
+   ```bash
+   python cartoon_rendering.py
+   ```
+
+### Code Implementation
+
+```python
+import cv2
+import numpy as np
+
+def cartoonize_image(image_path, out_path):
+    # Load Image
+    img = cv2.imread(image_path)
+    height, width = img.shape[:2]
+    img = cv2.resize(img, (width, height))
+    
+    # Convert to Grayscale
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    
+    # Apply Median Blur
+    gray = cv2.medianBlur(gray, 5)
+    
+    # Detect Edges using Adaptive Thresholding
+    edges = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, 
+                                  cv2.THRESH_BINARY, 9, 9)
+    
+    # Simplify Colors using Bilateral Filter
+    color = cv2.bilateralFilter(img, d=9, sigmaColor=200, sigmaSpace=200)
+    
+    # Combine Edges and Colors
+    cartoon = cv2.bitwise_and(color, color, mask=edges)
+    
+    # Save Output
+    cv2.imwrite(out_path, cartoon)
+
+    # Display Output
+    file_name = image_path.split('/')[-1]
+    cv2.imshow(f"Cartoonized_{file_name}", cartoon)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+# Run the cartoonization process for multiple images
+for i in range(0, 14):
+    cartoonize_image(f"./data/sample/sample{i}.jpg", f"./data/output/output{i}.jpg")
+```
 
 ## Sample Results
 
@@ -55,60 +120,6 @@ These images fail to produce a strong cartoon effect due to weak edge detection 
 
   ![ouput12](./data/output/output12.jpg)
 
-
-## How it Works
-
-This project converts an image into a cartoon-style effect using OpenCV. The process consists of the following steps:
-
-1. **Load Image:** The input image is loaded and resized while maintaining its aspect ratio.
-2. **Convert to Grayscale:** The image is converted to grayscale to simplify edge detection.
-3. **Apply Median Blur:** A median blur is applied to reduce noise.
-4. **Detect Edges:** Adaptive thresholding is used to create a binary edge mask.
-5. **Simplify Colors:** A bilateral filter smooths the image while preserving edges.
-6. **Combine Edges and Colors:** The edges are overlaid on the simplified color image to create a cartoon effect.
-7. **Save & Display Output:** The processed image is saved and displayed.
-
-### Code Implementation
-
-```python
-import cv2
-import numpy as np
-
-def cartoonize_image(image_path, out_path):
-    # Load Image
-    img = cv2.imread(image_path)
-    height, width = img.shape[:2]
-    img = cv2.resize(img, (width, height))
-    
-    # Convert to Grayscale
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    
-    # Apply Median Blur
-    gray = cv2.medianBlur(gray, 5)
-    
-    # Detect Edges using Adaptive Thresholding
-    edges = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, 
-                                  cv2.THRESH_BINARY, 9, 9)
-    
-    # Simplify Colors using Bilateral Filter
-    color = cv2.bilateralFilter(img, d=9, sigmaColor=200, sigmaSpace=200)
-    
-    # Combine Edges and Colors
-    cartoon = cv2.bitwise_and(color, color, mask=edges)
-    
-    # Save Output
-    cv2.imwrite(out_path, cartoon)
-
-    # Display Output
-    file_name = image_path.split('/')[-1]
-    cv2.imshow(f"Cartoonized_{file_name}", cartoon)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
-# Run the cartoonization process for multiple images
-for i in range(0, 14):
-    cartoonize_image(f"./data/sample/sample{i}.jpg", f"./data/output/output{i}.jpg")
-```
 
 ## Algorithm Limitations
 While this approach is effective in many cases, there are limitations:
